@@ -1,3 +1,6 @@
+import { Post } from "../api/posts/posts.model.js";
+
+
 export default [
     {
       "userId": 1,
@@ -599,4 +602,4 @@ export default [
       "title": "at nam consequatur ea labore ea harum",
       "body": "cupiditate quo est a modi nesciunt soluta\nipsa voluptas error itaque dicta in\nautem qui minus magnam et distinctio eum\naccusamus ratione error aut"
     }
-  ]
+  ].map((postData) => new Post(postData))
