@@ -1,0 +1,13 @@
+/api/users
+
+GET -> 200
+POST -> 201
+PUT -> 200
+DELETE - 204
+
+404
+403
+500
+
+JSON
+
