@@ -3,7 +3,7 @@ import usersRouter from './api/users/users.router.js'
 import postsRouter from './api/posts/posts.router.js'
 import { NotFoundError } from './errors/not-found.js'
 
-const app = express()
+export const app = express()
 
 app.use(express.json())
 
@@ -24,8 +24,4 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500).json({
         message: err.message
     })
-})
-
-app.listen(3000, () => {
-    console.log('Le serveur tourne sur le port 3000')
 })
