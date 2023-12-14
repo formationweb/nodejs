@@ -34,7 +34,7 @@ describe('Tester API /api/users', () => {
         expect(response.statusCode).toBe(404)
     })
 
-    /*test('[GET] Get Post By  user Id', async () => {
+    test('[GET] Get Post By  user Id', async () => {
         const response = await request(app)
             .get(URL + '/1/posts')
         expect(response.statusCode).toBe(200)
@@ -43,7 +43,7 @@ describe('Tester API /api/users', () => {
 
     test('[GET] Get Post By  user Id - fake id', async () => {
         const response = await request(app)
-            .get(URL + '/fefez/posts')
+            .get(URL + '/0/posts')
         expect(response.statusCode).toBe(404)
-    })*/
+    })
 })

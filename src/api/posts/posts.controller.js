@@ -1,12 +1,12 @@
 import { NotFoundError } from '../../errors/not-found.js'
 import { Post } from './posts.model.js'
 
-export async function getPosts(req, res) {
+export async function getPosts(req, res, next) {
     try {
         const searchValue = req.query.search
         const posts = await Post.findAll(searchValue ? {
             where: {
-                name: searchValue
+                title: searchValue
             }
         } : undefined)
         res.json(posts)
