@@ -1,15 +1,21 @@
 import postsData from '../../data/posts.js'
+import { BadRequestError } from '../../errors/bad-request.js'
 import { NotFoundError } from '../../errors/not-found.js'
+import { User } from './users.model.js'
 
-export function getUsers(req, res) {
-    const searchValue = req.query.search
-    res.json([
-        {
-            id: 1,
-            name: searchValue,
-            email: 'dzd@gmail.com'
-        }
-    ])
+export async function getUsers(req, res) {
+    try {
+        const searchValue = req.query.search
+        const users = await User.findAll(searchValue ? {
+            where: {
+                name: searchValue
+            }
+        } : undefined)
+        res.json(users)
+    }
+    catch (err) {
+        next(err)
+    }
 }
 
 export function getPostsByUser(req, res, next) {
@@ -22,15 +28,63 @@ export function getPostsByUser(req, res, next) {
     res.json(postsFound)
 }
 
-export function updateUser(req, res, next) {
-    const id = +req.params.userId
-    const body = req.body
-    if (!isNaN(id)) {
-        res.json({
-            id: id,
-            ...body
-        })
-        return
+export async function updateUser(req, res, next) {
+    try {
+        const id = +req.params.userId
+        const { name, email } = req.body
+        if (!isNaN(id)) {
+            const [userId] = await User.update({
+                name, 
+                email
+            }, {
+                where: {
+                    id
+                }
+            })
+            if (!userId) {
+                throw new NotFoundError('Utilisateur non trouvée')
+            }
+            res.json(await User.findByPk(userId))
+            return
+        }
+        throw new BadRequestError('Id incorrect')
     }
-    next(new NotFoundError('Utilisateur non trouvée'))
+    catch (err) {
+        next(err)
+    }
+}
+
+export async function createUser(req, res, next) {
+    try {
+        const { name, email } = req.body
+        if (!email) {
+            throw new BadRequestError('Email manquant')
+        }
+        if (!name) {
+            throw new BadRequestError('Nom manquant')
+        }
+        const user = await User.create({ name, email })
+        res.json(user)
+    }
+    catch (err) {
+        next(err)
+    }
+}
+
+export async function deleteUser(req, res, next) {
+    try {
+        const id = +req.params.userId
+        const userIdDeleted = await User.destroy({
+            where: {
+                id
+            }
+        })
+        if (!userIdDeleted) {
+            throw new NotFoundError('Utilisateur non trouvée')
+        }
+        res.status(204).send()
+    }
+    catch (err) {
+        next(err)
+    }
 }

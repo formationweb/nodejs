@@ -2,6 +2,9 @@ import express from 'express'
 import usersRouter from './api/users/users.router.js'
 import postsRouter from './api/posts/posts.router.js'
 import { NotFoundError } from './errors/not-found.js'
+import sequelize from './db.js'
+
+await sequelize.sync()
 
 export const app = express()
 
