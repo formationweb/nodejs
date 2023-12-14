@@ -1,4 +1,3 @@
-import postsData from '../../data/posts.js'
 import { BadRequestError } from '../../errors/bad-request.js'
 import { NotFoundError } from '../../errors/not-found.js'
 import { User } from './users.model.js'

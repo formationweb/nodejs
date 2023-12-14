@@ -1,4 +1,3 @@
-import postsData from '../../data/posts.js'
 import { NotFoundError } from '../../errors/not-found.js'
 
 export function getPosts(req, res) {
