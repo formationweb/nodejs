@@ -4,6 +4,7 @@ import { app } from '../src/server'
 
 const URL = '/api/posts'
 
+
 describe('Tester API /api/posts', () => {
     test('[GET] Posts', async () => {
         const response = await request(app).get(URL)
