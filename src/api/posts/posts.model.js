@@ -1,11 +1,8 @@
 import { DataTypes } from "sequelize";
 import db from "../../db.js";
+import { User } from "../users/users.model.js";
 
 export const Post = db.define('Post', {
-    userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
     title: {
         type: DataTypes.STRING,
         allowNull: false
@@ -14,4 +11,14 @@ export const Post = db.define('Post', {
         type: DataTypes.TEXT,
         allowNull: false
     }
+})
+
+User.hasMany(Post, {
+    foreignKey: 'userId',
+    as: 'posts'
+})
+
+Post.belongsTo(User, {
+    foreignKey: 'userId',
+    as: 'user'
 })

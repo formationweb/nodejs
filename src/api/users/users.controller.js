@@ -21,7 +21,16 @@ export async function getUsers(req, res) {
 export async function getPostsByUser(req, res, next) {
     try {
         const id = req.params.userId
-        const userExist = await User.findByPk(id)
+        const user = await User.findByPk(id, {
+            include: [{
+                model: Post,
+                as: 'posts'
+            }]
+        })
+        if (!user) {
+            throw new NotFoundError('Utilisateur non trouvé')
+        }
+       /* const userExist = await User.findByPk(id)
         if (!userExist) {
             throw new NotFoundError('Utilisateur non trouvé')
         }
@@ -29,8 +38,8 @@ export async function getPostsByUser(req, res, next) {
             where: {
                 userId: id
             }
-        })
-        res.json(postsFound)
+        })*/
+        res.json(user.posts)
     }
     catch (err) {
         next(err)

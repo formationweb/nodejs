@@ -8,6 +8,11 @@ export const User = db.define('User', {
     },
     email: {
         type: DataTypes.STRING,
-        allowNull: false
-    }
+        allowNull: false,
+        validate: {
+            isEmail: true
+        },
+        unique: true
+    },
 })
+
