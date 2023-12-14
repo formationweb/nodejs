@@ -1,8 +1,21 @@
 import request from 'supertest'
 import { app } from '../src/server'
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
 const URL = '/api/users'
+
+vi.mock('../src/data/posts', () => {
+    return {
+        default: [
+            {
+                id: 1,
+                userId: 1,
+                title: 'adda',
+                body: 'dzdz'
+            }
+        ]
+    }
+})
 
 describe('Tester API /api/users', () => {
     test('[GET] Endpoint /api/users', async () => {
@@ -29,6 +42,19 @@ describe('Tester API /api/users', () => {
                 name: 'ben',
                 email: 'ben@gmail.com'
             })
+        expect(response.statusCode).toBe(404)
+    })
+
+    test('[GET] Get Post By  user Id', async () => {
+        const response = await request(app)
+            .get(URL + '/1/posts')
+        expect(response.statusCode).toBe(200)
+        expect(response.body).toHaveLength(1)
+    })
+
+    test('[GET] Get Post By  user Id - fake id', async () => {
+        const response = await request(app)
+            .get(URL + '/fefez/posts')
         expect(response.statusCode).toBe(404)
     })
 })
