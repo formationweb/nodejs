@@ -1,21 +1,48 @@
 import { NotFoundError } from '../../errors/not-found.js'
+import { Post } from './posts.model.js'
 
-export function getPosts(req, res) {
-    const searchStr = req.query.search
-    if (!searchStr) {
-        res.json(postsData)
-        return
+export async function getPosts(req, res) {
+    try {
+        const searchValue = req.query.search
+        const posts = await Post.findAll(searchValue ? {
+            where: {
+                name: searchValue
+            }
+        } : undefined)
+        res.json(posts)
     }
-    const postsFound = postsData.filter(post => post.title.includes(searchStr))
-    res.json(postsFound)
+    catch (err) {
+        next(err)
+    }
 }
 
-export function getPost(req, res, next) {
+export async function getPost(req, res, next) {
     const id = req.params.postId
-    const postFound = postsData.find(post => post.id == id)
-    if (!postFound) {
-        next(new NotFoundError('Article not found'))
-        return
+    try {
+        const post = await Post.findByPk(id)
+        if (!post) {
+            throw new NotFoundError('Article non trouvé')
+        }
+        res.json(post)
     }
-    res.json(postFound)
+    catch (err) {
+        next(err)
+    }
+}
+
+export async function createPost(req, res, next) {
+    try {
+        const { title, body } = req.body
+        if (!title) {
+            throw new BadRequestError('Titre manquant')
+        }
+        if (!body) {
+            throw new BadRequestError('Corps manquant')
+        }
+        const post = await Post.create({ title, body, userId: 3 })
+        res.json(post)
+    }
+    catch (err) {
+        next(err)
+    }
 }
