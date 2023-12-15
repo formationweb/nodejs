@@ -20,7 +20,7 @@ export async function getUsers(req, res) {
             ]
         }
          */
-        const users = await User.find(searchValue ?  {
+        const users = await User.find(searchValue ? {
             name: {
                 $eq: searchValue
             }
@@ -35,13 +35,14 @@ export async function getUsers(req, res) {
 export async function getPostsByUser(req, res, next) {
     try {
         const id = req.params.userId
-        const user = await User.findById(id)
-        if (!user) {
-            throw new NotFoundError('Utilisateur non trouvé')
-        }
-        const posts = await Post.find({
-            userId: 'fake'
+        const posts = await Post.find().populate({
+            path: 'userId',
+            select: 'name',
+            match: {
+                _id: id
+            }
         })
+        //const posts = await Post.find({ userId: id })
         res.json(posts)
     }
     catch (err) {
@@ -54,7 +55,7 @@ export async function updateUser(req, res, next) {
         const id = req.params.userId
         const { name, email } = req.body
         const user = await User.findByIdAndUpdate(id, {
-            name, 
+            name,
             email
         }, {
             new: true

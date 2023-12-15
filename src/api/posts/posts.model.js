@@ -1,7 +1,10 @@
 import { Schema, model } from "mongoose";
 
 const postSchema = new Schema({
-    userId: String,
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
     title: {
         type: String,
         required: true,

@@ -5,7 +5,9 @@ export async function getPosts(req, res, next) {
     try {
         const searchValue = req.query.search
         const posts = await Post.find(searchValue ? {
-            title: searchValue
+            title: {
+                $regex: new RegExp(searchValue, 'i')
+            }
         } : undefined)
         res.json(posts)
     }

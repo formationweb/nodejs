@@ -1,19 +1,12 @@
 import request from 'supertest'
 import { app } from '../src/server'
-import { beforeAll, describe, expect, test, beforeEach } from "vitest";
-import { MongoMemoryServer } from 'mongodb-memory-server'
+import { describe, expect, test, beforeEach } from "vitest";
 import mongoose from 'mongoose';
 import { User } from '../src/api/users/users.model';
 
 const URL = '/api/users'
 
 let user
-
-beforeAll(async () => {
-    const mongoServer = await MongoMemoryServer.create()
-    const uri = mongoServer.getUri()
-    mongoose.connect(uri)
-})
 
 beforeEach(async () => {
     await mongoose.connection.dropDatabase()
