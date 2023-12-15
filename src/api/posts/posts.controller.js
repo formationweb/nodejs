@@ -39,7 +39,7 @@ export async function createPost(req, res, next) {
         if (!body) {
             throw new BadRequestError('Corps manquant')
         }
-        const post = new Post({ title, body, userId: 'fake' })
+        const post = new Post({ title, body, userId: req.user._id })
         const postModified = await post.save()
         res.json(postModified)
     }

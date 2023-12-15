@@ -1,7 +1,10 @@
 import { BadRequestError } from '../../errors/bad-request.js'
+import { NotAuthorizedError } from '../../errors/not-authorized.js'
 import { NotFoundError } from '../../errors/not-found.js'
 import { Post } from '../posts/posts.model.js'
 import { User } from './users.model.js'
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
 
 export async function getUsers(req, res) {
     try {
@@ -72,7 +75,7 @@ export async function updateUser(req, res, next) {
 
 export async function createUser(req, res, next) {
     try {
-        const { name, email } = req.body
+        const { name, email, password } = req.body
         if (!email) {
             throw new BadRequestError('Email manquant')
         }
@@ -81,9 +84,11 @@ export async function createUser(req, res, next) {
         }
         const user = new User({
             email,
-            name
+            name,
+            password
         })
         const userCreated = await user.save()
+        userCreated.password = undefined
         res.json(userCreated)
     }
     catch (err) {
@@ -99,6 +104,30 @@ export async function deleteUser(req, res, next) {
             throw new NotFoundError('Utilisateur non trouvée')
         }
         res.status(204).send()
+    }
+    catch (err) {
+        next(err)
+    }
+}
+
+export async function login(req, res, next) {
+    try {
+        const { email, password } = req.body
+        const user = await User.findOne({ email })
+        if (!user) {
+            throw new NotAuthorizedError()
+        }
+        const bool = await bcrypt.compare(password, user.password)
+        if (!bool) {
+            throw new NotAuthorizedError()
+        }
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_TOKEN, {
+            expiresIn: '3d'
+        })
+        res.json({
+            token,
+            userId: user._id
+        })
     }
     catch (err) {
         next(err)
