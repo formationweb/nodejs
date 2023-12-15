@@ -4,10 +4,14 @@ import postsRouter from './api/posts/posts.router.js'
 import meRouter from './api/me/me.router.js'
 import { NotFoundError } from './errors/not-found.js'
 import { authMiddleware } from './middlewares/auth.js'
+import cors from 'cors'
+import helmet from 'helmet'
 
 export const app = express()
 
 app.use(express.json())
+app.use(cors())
+app.use(helmet())
 
 // app.use((req, res, next) => {
 //     const error = new Error('Auth Failed')
