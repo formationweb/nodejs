@@ -1,8 +1,15 @@
-import { Sequelize } from "sequelize";
+import mongoose from "mongoose";
 
-const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: './database/db.sqlite'
+mongoose.connect(process.env.MONGO_URI)
+
+const db = mongoose.connection
+
+db.on('error', (err) => {
+    console.log(err)
 })
 
-export default sequelize
+db.on('open', () => {
+    console.log('database connected')
+})
+
+export default db

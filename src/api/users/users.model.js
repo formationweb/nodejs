@@ -1,18 +1,31 @@
-import { DataTypes } from "sequelize";
-import db from "../../db.js";
+import { Schema, model } from "mongoose";
+import pkg from 'validator';
 
-export const User = db.define('User', {
+const { isEmail } = pkg;
+
+const userSchema = new Schema({
     name: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: String,
+        required: true
     },
     email: {
-        type: DataTypes.STRING,
-        allowNull: false,
+        type: String,
+        required: true,
+        unique: true,
         validate: {
-            isEmail: true
-        },
-        unique: true
+            validator: isEmail,
+            message: 'Email incorrect'
+        }
     },
+    age: Number,
+    date: {
+        type: Date,
+        default: Date.now
+    },
+    role: {
+        type: String,
+        enum: ['admin', 'member']
+    }
 })
 
+export const User = model('User', userSchema)
