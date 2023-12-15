@@ -1,24 +1,16 @@
-import { DataTypes } from "sequelize";
-import db from "../../db.js";
-import { User } from "../users/users.model.js";
+import { Schema, model } from "mongoose";
 
-export const Post = db.define('Post', {
+const postSchema = new Schema({
+    userId: String,
     title: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: String,
+        required: true,
+        maxlength: 100
     },
     body: {
-        type: DataTypes.TEXT,
-        allowNull: false
+        type: String,
+        required: true
     }
 })
 
-User.hasMany(Post, {
-    foreignKey: 'userId',
-    as: 'posts'
-})
-
-Post.belongsTo(User, {
-    foreignKey: 'userId',
-    as: 'user'
-})
+export const Post = model('Post', postSchema)
