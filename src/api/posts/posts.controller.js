@@ -4,10 +4,8 @@ import { Post } from './posts.model.js'
 export async function getPosts(req, res, next) {
     try {
         const searchValue = req.query.search
-        const posts = await Post.findAll(searchValue ? {
-            where: {
-                title: searchValue
-            }
+        const posts = await Post.find(searchValue ? {
+            title: searchValue
         } : undefined)
         res.json(posts)
     }
@@ -19,7 +17,7 @@ export async function getPosts(req, res, next) {
 export async function getPost(req, res, next) {
     const id = req.params.postId
     try {
-        const post = await Post.findByPk(id)
+        const post = await Post.findById(id)
         if (!post) {
             throw new NotFoundError('Article non trouvé')
         }
@@ -39,8 +37,9 @@ export async function createPost(req, res, next) {
         if (!body) {
             throw new BadRequestError('Corps manquant')
         }
-        const post = await Post.create({ title, body, userId: 3 })
-        res.json(post)
+        const post = new Post({ title, body, userId: 'fake' })
+        const postModified = await post.save()
+        res.json(postModified)
     }
     catch (err) {
         next(err)

@@ -1,6 +1,6 @@
 import { BadRequestError } from '../../errors/bad-request.js'
 import { NotFoundError } from '../../errors/not-found.js'
-//import { Post } from '../posts/posts.model.js'
+import { Post } from '../posts/posts.model.js'
 import { User } from './users.model.js'
 
 export async function getUsers(req, res) {
@@ -35,25 +35,14 @@ export async function getUsers(req, res) {
 export async function getPostsByUser(req, res, next) {
     try {
         const id = req.params.userId
-        const user = await User.findById(id, {
-            include: [{
-                model: Post,
-                as: 'posts'
-            }]
-        })
+        const user = await User.findById(id)
         if (!user) {
             throw new NotFoundError('Utilisateur non trouvé')
         }
-       /* const userExist = await User.findByPk(id)
-        if (!userExist) {
-            throw new NotFoundError('Utilisateur non trouvé')
-        }
-        const postsFound = await Post.findAll({
-            where: {
-                userId: id
-            }
-        })*/
-        res.json(user.posts)
+        const posts = await Post.find({
+            userId: 'fake'
+        })
+        res.json(posts)
     }
     catch (err) {
         next(err)
