@@ -11,6 +11,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "express": "^4.21.0"
+    "express": "^4.21.0",
+    "markdown-it": "^14.1.0"
   }
 }
