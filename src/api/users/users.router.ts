@@ -1,26 +1,10 @@
 import { Router } from 'express'
+import { getUser, getUserPosts, getUsers } from './users.controller'
 
 const router = Router()
 
-router.get('/', (req, res ,next) => {
-    res.json([
-        {
-            id: 1,
-            name: 'ana',
-            email: 'ana@gmail.com'
-        }
-    ])
-})
-
-router.get('/:userId', (req, res, next) => {
-    const testValue = req.query.test
-    console.log(testValue)
-    const id = req.params.userId
-    res.json({
-        id, // équivalent à id: id
-        name: 'ana',
-        email: 'ana@gmail.com'
-    })
-})
+router.get('/',getUsers)
+router.get('/:userId', getUser)
+router.get('/:userId/posts', getUserPosts)
 
 export default router
