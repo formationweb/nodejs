@@ -1,5 +1,8 @@
+import { BadRequestError } from './../../errors/bad-request';
 import { NotFoundError } from './../../errors/not-found';
 import fs from 'fs'
+import { z } from 'zod'
+import { userSchema } from './users.schema';
 
 const data = JSON.parse(fs.readFileSync("src/data/posts.json", "utf-8"));
 
@@ -32,4 +35,26 @@ export function getUserPosts(req, res, next) {
         return
     }
     res.json(userPosts)
+}
+
+export function createUser(req, res, next) {
+    const { success, error, data } = userSchema.safeParse(req.body)
+    if (success) {
+        const { name, email } = data
+        res.status(201).json({ name, email })
+    }
+    else {
+        console.log(error.errors)
+        next(new BadRequestError())
+    }
+}
+
+export function updateUser(req, res, next) {
+    const id = req.params.userId
+    res.json({ name: 'test' })
+}
+
+export function deleteUser(req, res, next) {
+    const id = req.params.userId
+    res.status(204).send()
 }
