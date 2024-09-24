@@ -4,7 +4,9 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node --watch main.js",
+    "test": "echo 'test'",
+    "dev": "cd convert/dist && serve"
   },
   "keywords": [],
   "author": "",
@@ -13,5 +15,8 @@
   "dependencies": {
     "express": "^4.21.0",
     "markdown-it": "^14.1.0"
+  },
+  "devDependencies": {
+    "serve": "^14.2.3"
   }
 }
