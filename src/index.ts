@@ -1,5 +1,7 @@
 import { app } from "./server"
 
-app.listen(3000, () => {
-    console.log('serveur démarre')
+const port = process.env.PORT || 3000
+
+app.listen(port, () => {
+    console.log('serveur démarre', port)
 })

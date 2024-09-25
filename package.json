@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx --watch src/index.js",
+    "dev": "tsx --watch --env-file=.env src/index.ts",
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
@@ -12,6 +12,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "supertest": "^7.0.0",
     "zod": "^3.23.8"
