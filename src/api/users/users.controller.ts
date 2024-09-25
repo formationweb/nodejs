@@ -3,19 +3,19 @@ import { NotFoundError } from './../../errors/not-found';
 import fs from 'fs'
 import { z, ZodError } from 'zod'
 import { Follow, followSchema, userSchema } from './users.schema';
+import { UserModel } from './users.model';
 
 const data = JSON.parse(fs.readFileSync("src/data/posts.json", "utf-8"));
-const users = JSON.parse(fs.readFileSync("src/data/users.json", "utf-8"));
 const follows: Follow[] = []
 
-export function getUsers(req, res ,next)  {
-    res.json([
-        {
-            id: 1,
-            name: 'ana',
-            email: 'ana@gmail.com'
-        }
-    ])
+export async function getUsers(req, res ,next)  {
+    try {
+        const users = await UserModel.find()
+        res.json(users)
+    }
+    catch (err) {
+        next(err)
+    }
 }
 
 export function getUser(req, res ,next) {
