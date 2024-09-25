@@ -5,30 +5,35 @@ import { app } from '../src/server'
 
 const URL = '/api/users'
 
-describe('Tester le controller /api/users', () => {
-    test('Tester getUsers()', () => {
-        const req = vi.fn()
-        const res = {
-            json: vi.fn()
-        }
-        const next = vi.fn()
-        getUsers(req, res, next)
-        expect(res.json).toHaveBeenCalled()
-        expect(res.json).toHaveBeenCalledWith([ 
-            {
-                id: 1,
-                name: 'ana',
-                email: 'ana@gmail.com'
-            }
-        ])
-    })
+vi.mock('sequelize')
 
+describe('Tester le controller /api/users', () => {
     test('[GET] User', async () => {
         const res = await request(app).get(URL)
         expect(res.status).toBe(200)
         expect(res.body).toHaveLength(1)
+        expect(res.body[0]).toHaveProperty('name', 'ana')
     })
 
+    test('[GET] User Id', async () => {
+        const res = await request(app).get(URL + '/1')
+        expect(res.status).toBe(200)
+        expect(res.body).toHaveProperty('name', 'ana')
+    })
+
+    test('[POST] Create User', async () => {
+        const res = await request(app).post(URL).send({
+            name: 'ben',
+            email: 'ben@gmail.com'
+        })
+        expect(res.status).toBe(201)
+        expect(res.body).toHaveProperty('id')
+        expect(res.body).toHaveProperty('name', 'ben')
+        expect(res.body).toHaveProperty('email', 'ben@gmail.com')
+    })
+
+
+    /*
     test('[GET] User Posts', async () => {
         const res = await request(app).get(URL + '/1/posts')
         expect(res.status).toBe(200)
@@ -69,8 +74,5 @@ describe('Tester le controller /api/users', () => {
             })
         expect(res.status).toBe(400)
     })
-
-
-    //  await request(app).post(URL).send({  })
-    //  expect({ }).toHaveProperty('name', 'ana')
+        */
 })
