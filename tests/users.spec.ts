@@ -40,6 +40,37 @@ describe('Tester le controller /api/users', () => {
         expect(res.status).toBe(404)
     })
 
+    test('[GET] Follow User', async () => {
+        const res = await request(app)
+            .post(URL + '/follow')
+            .send({
+                followerId: 1,
+                followeeId: 2
+            })
+        expect(res.status).toBe(204)
+    })
+
+    test('[GET] Follow User Not Found', async () => {
+        const res = await request(app)
+            .post(URL + '/follow')
+            .send({
+                followerId: 1000,
+                followeeId: 2
+            })
+        expect(res.status).toBe(404)
+    })
+
+    test('[GET] Follow User with fake data', async () => {
+        const res = await request(app)
+            .post(URL + '/follow')
+            .send({
+                followerId: 'fake',
+                followeeId: 2
+            })
+        expect(res.status).toBe(400)
+    })
+
+
     //  await request(app).post(URL).send({  })
     //  expect({ }).toHaveProperty('name', 'ana')
 })

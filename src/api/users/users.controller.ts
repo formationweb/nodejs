@@ -1,10 +1,12 @@
 import { BadRequestError } from './../../errors/bad-request';
 import { NotFoundError } from './../../errors/not-found';
 import fs from 'fs'
-import { z } from 'zod'
-import { userSchema } from './users.schema';
+import { z, ZodError } from 'zod'
+import { Follow, followSchema, userSchema } from './users.schema';
 
 const data = JSON.parse(fs.readFileSync("src/data/posts.json", "utf-8"));
+const users = JSON.parse(fs.readFileSync("src/data/users.json", "utf-8"));
+const follows: Follow[] = []
 
 export function getUsers(req, res ,next)  {
     res.json([
@@ -57,4 +59,28 @@ export function updateUser(req, res, next) {
 export function deleteUser(req, res, next) {
     const id = req.params.userId
     res.status(204).send()
+}
+
+export function followUser(req, res, next) {
+   try {
+    const followData = followSchema.parse(req.body)
+    const { followerId, followeeId } = followData
+
+    if (!users.find(user => user.id == followerId)) {
+        throw new NotFoundError('User Id')
+    }
+    if (!users.find(user => user.id == followeeId)) {
+        throw new NotFoundError('User Id')
+    }
+
+    follows.push(followData)
+    res.status(204).send()
+   }
+   catch (err) {
+     if (err instanceof ZodError) {
+        next(new BadRequestError(err.message))
+        return
+     }
+     next(err)
+   }
 }

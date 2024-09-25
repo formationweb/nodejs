@@ -1,8 +1,8 @@
-REST:
+/api/users/follow
 
-/api/users/:id
+POST
 
-GET ->
-POST 201
-PUT ->
-DELETE -> 204
+{ followerId, followeeId }
+
+
+const follows = [];
