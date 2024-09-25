@@ -1,4 +1,5 @@
 import { DataTypes as OriginalDataTypes } from "sequelize";
+import { vi } from "vitest";
 
 const fakeData = [
   {
@@ -8,13 +9,15 @@ const fakeData = [
   },
 ];
 
-class UserModelMock {
-  static async findAll() {
-    return fakeData;
+const postfakeData = [
+  {
+    id: 1,
+    title: "title",
+    content: "content sunt",
   }
-  static async findByPk(id) {
-    return fakeData.find(user => user.id == id);
-  }
+]
+
+class Mock {
   static async create(obj) {
     return {
         id: 1,
@@ -23,10 +26,41 @@ class UserModelMock {
   }
 }
 
+class UserModelMock extends Mock {
+  static async findAll() {
+    return fakeData;
+  }
+  static async findByPk(id) {
+    return fakeData.find(user => user.id == id);
+  }
+}
+
+export class PostModelMock extends Mock {
+  //static findAll = vi.fn().mockResolvedValue(postfakeData)
+  static findAll(options) {
+    if (!options) {
+      return postfakeData
+    }
+    if (options.where.title) {
+      return [
+        {
+          id: 2,
+          title: 'search title',
+          content: 'content'
+        }
+      ]
+    }
+  }
+  static async findByPk(id) {
+    return postfakeData.find(post => post.id == id);
+  }
+}
+
 export class Sequelize {
   async sync() {}
   define(name, schema) {
     if (name == "User") return UserModelMock;
+    if (name == "Post") return PostModelMock
   }
 }
 
