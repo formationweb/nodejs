@@ -2,31 +2,55 @@ import fs from "fs";
 import { NotFoundError } from "../../errors/not-found";
 import { BadRequestError } from "../../errors/bad-request";
 import { Post } from "./posts.model";
+import isMongoId from 'validator/lib/isMongoId';
 
-const data = 
-  JSON.parse(fs.readFileSync("src/data/posts.json", "utf-8"))
-  .map(post => new Post(post))
-
-export function getPosts(req, res, next) {
-  const search = req.query.search;
-  if (search) {
-    const posts = data.filter((post: Post) => post.body.includes(search));
+export async function getPosts(req, res, next) {
+  try {
+    const search = req.query.search;
+    const posts = await Post.find(
+      search
+        ? {
+            content: {
+              $regexp: new RegExp(search, "i"),
+            },
+          }
+        : {}
+    );
     res.json(posts);
-    return;
+  } catch (err) {
+    next(err);
   }
-  res.json(data);
 }
 
-export function getPost(req, res, next) {
-  const id = +req.params.postId;
-  if (id > 0) {
-    const [post] = data.filter((post) => post.id == id);
-    if (!post) {
-      next(new NotFoundError("Posts"));
-      return;
+export async function getPost(req, res, next) {
+  try {
+    const id = req.params.postId;
+    if (isMongoId(id)) {
+      const post = await Post.findById(id)
+      if (!post) {
+        throw new NotFoundError('Post')
+      }
+      res.json(post);
+      return
     }
-    res.json(post);
-    return;
+    throw new BadRequestError()
+  } catch (err) {
+    next(err)
   }
-  next(new BadRequestError());
+}
+
+export async function createPost(req, res, next) {
+  try {
+    const { title, content } = req.body;
+    const post = new Post({
+      title,
+      content,
+      //userId: 
+    });
+    const postCreated = await post.save();
+    res.status(201).json(postCreated);
+  }
+  catch (err) {
+     next(err)
+  }
 }

@@ -16,9 +16,13 @@ app.use((req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
+    const options: any = {}
+    if (process.env.NODE_ENV != 'production')  {
+        options.stack = err.stack
+    }
     res.status(err.status || 500).json({
         ...err,
         message: err.message,
-        stack: err.stack // only dev
+        ...options
     })
 })

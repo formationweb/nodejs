@@ -1,4 +1,5 @@
 import { model, Schema } from "mongoose";
+import isEmail from 'validator/lib/isEmail';
 
 export const UserModel = model('User', new Schema({
     name: {
@@ -8,7 +9,14 @@ export const UserModel = model('User', new Schema({
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        validate: {
+            // validator: (email) => {
+            //     return email.includes('@')
+            // }
+            validator: isEmail,
+            message: 'Email incorrect'
+        }
     },
     createdAt: {
         type: Date,
