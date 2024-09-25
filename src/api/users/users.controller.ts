@@ -4,8 +4,8 @@ import fs from "fs";
 import { z, ZodError } from "zod";
 import { Follow, followSchema, userSchema } from "./users.schema";
 import { User } from "./users.model";
+import { Post } from "../posts/posts.model";
 
-const data = JSON.parse(fs.readFileSync("src/data/posts.json", "utf-8"));
 const follows: Follow[] = [];
 
 export async function getUsers(req, res, next) {
@@ -35,14 +35,25 @@ export async function getUser(req, res, next) {
   }
 }
 
-export function getUserPosts(req, res, next) {
-  const id = req.params.userId;
-  const userPosts = data.filter((post) => post.userId == id);
-  if (userPosts.length == 0) {
-    next(new NotFoundError("not user"));
-    return;
+export async function getUserPosts(req, res, next) {
+  try {
+    const id = req.params.userId;
+    const user = await User.findByPk(id, {
+      include: [
+        {
+          model: Post,
+          as: 'posts'
+        }
+      ]
+    })
+    if (!user) {
+      throw new NotFoundError('Not Found')
+    }
+    res.json(user);
   }
-  res.json(userPosts);
+  catch (err) {
+    next(err)
+  }
 }
 
 export async function createUser(req, res, next) {
