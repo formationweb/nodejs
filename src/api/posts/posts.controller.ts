@@ -32,10 +32,16 @@ export async function getPost(req, res, next) {
     const id = +req.params.postId;
     if (id > 0) {
       const post = await Post.findByPk(id, {
+        attributes: {
+          exclude: ['createdAt']
+        },
         include: [
           {
             model: User,
-            as: 'user'
+            as: 'user',
+            attributes: {
+              exclude: ['email']
+            }
           }
         ]
       })

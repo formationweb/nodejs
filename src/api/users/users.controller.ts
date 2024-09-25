@@ -13,7 +13,7 @@ export async function getUsers(req, res, next) {
     const users = await User.findAll({
         // where: {
         //     name: ''
-        // }
+        // },
     });
     res.json(users);
   } catch (err) {
