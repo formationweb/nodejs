@@ -6,6 +6,8 @@ import postsRouter from './api/posts/posts.router'
 import meRouter from './api/me/me.router'
 import { NotFoundError } from './errors/not-found'
 import { authMiddleware } from './middlewares/auth'
+import cors from 'cors'
+import helmet from 'helmet'
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -15,6 +17,20 @@ app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'pug')
 
 app.use(express.json())
+app.use(cors())
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            'script-src': ["'self'", "cdnjs.cloudflare.com"]
+        }
+    }
+}))
+/*
+{
+    origin: 'http://monfrontend.com',
+    methods: ['GET']
+}
+    */
 
 app.use('/api/me', authMiddleware, meRouter)
 app.use('/api/users', usersRouter)

@@ -173,6 +173,11 @@ export async function login(req, res ,next) {
      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_TOKEN as string, {
       expiresIn: '3d'
      })
+    //  res.cookie('token', token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV == 'production',
+    //   maxAge: 3 * 24 * 60 * 60 * 1000 // 3 jours
+    //  })
      res.json({
       token,
       userId: user._id
