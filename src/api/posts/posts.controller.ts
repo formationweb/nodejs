@@ -11,7 +11,7 @@ export async function getPosts(req, res, next) {
       search
         ? {
             content: {
-              $regexp: new RegExp(search, "i"),
+              $regex: new RegExp(search, "i"),
             },
           }
         : {}

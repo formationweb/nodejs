@@ -20,6 +20,9 @@ app.use((err, req, res, next) => {
     if (process.env.NODE_ENV != 'production')  {
         options.stack = err.stack
     }
+    if (!err.status) {
+        console.log(err)
+    }
     res.status(err.status || 500).json({
         ...err,
         message: err.message,
