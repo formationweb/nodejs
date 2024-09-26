@@ -4,13 +4,11 @@ import { NotFoundError } from "./../../errors/not-found";
 import fs from "fs";
 import { z, ZodError } from "zod";
 import { Follow, followSchema, userSchema, User } from "./users.schema";
-import { IUser, UserModel } from "./users.model";
+import { FollowModel, IUser, UserModel } from "./users.model";
 import { Post } from "../posts/posts.model";
 import { NotAuthorizedError } from "../../errors/not-authorized";
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-
-const follows: Follow[] = [];
 
 /**
  * UserModel.find()
@@ -131,19 +129,26 @@ export async function deleteUser(req, res, next) {
   }
 }
 
-export function followUser(req, res, next) {
+export async function followUser(req, res, next) {
   try {
+    const user = req.user as IUser
     const followData = followSchema.parse(req.body);
-    const { followerId, followeeId } = followData;
+    const { followeeId } = followData;
+    const followerId = user._id
 
-    if (!users.find((user) => user.id == followerId)) {
-      throw new NotFoundError("User Id");
-    }
-    if (!users.find((user) => user.id == followeeId)) {
-      throw new NotFoundError("User Id");
+    const followee = await UserModel.findById(followeeId)
+    if (!followee) {
+      throw new NotFoundError('User to follow')
     }
 
-    follows.push(followData);
+    const existingFollow = await FollowModel.findOne({ followerId, followeeId })
+    if (existingFollow) {
+      throw new BadRequestError('Already following')
+    }
+
+    const newFollow = new FollowModel({ followerId, followeeId })
+    await newFollow.save()
+    
     res.status(204).send();
   } catch (err) {
     if (err instanceof ZodError) {

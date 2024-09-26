@@ -20,7 +20,7 @@ router.get("/:userId/posts", getUserPosts);
 router.post("/", createUser);
 router.put("/:userId", updateUser);
 router.delete("/:userId", authMiddleware, isAdminMiddleware, deleteUser);
-router.post("/follow", followUser);
+router.post("/follow", authMiddleware, followUser);
 router.post("/login", login);
 
 export default router;

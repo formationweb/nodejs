@@ -10,6 +10,7 @@ export enum Role {
 
 export interface IUser extends User {
     role: Role
+    _id: string
 }
 
 const userSchema =  new Schema({
@@ -51,3 +52,19 @@ userSchema.pre('save', async function() {
 })
 
 export const UserModel = model('User', userSchema)
+export const FollowModel = model('Follow', new Schema({
+    followerId: {
+        type: Schema.Types.ObjectId,
+        ref:' User',
+        required: true
+    },
+    followeeId: {
+        type: Schema.Types.ObjectId,
+        ref:' User',
+        required: true
+    },
+    dateCreated: {
+        type: Date,
+        default: Date.now
+    }
+}))
