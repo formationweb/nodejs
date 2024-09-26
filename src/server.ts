@@ -2,12 +2,15 @@ import 'dotenv/config'
 import express from 'express'
 import usersRouter from './api/users/users.router'
 import postsRouter from './api/posts/posts.router'
+import meRouter from './api/me/me.router'
 import { NotFoundError } from './errors/not-found'
+import { authMiddleware } from './middlewares/auth'
 
 export const app = express()
 
 app.use(express.json())
 
+app.use('/api/me', authMiddleware, meRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/posts', postsRouter)
 

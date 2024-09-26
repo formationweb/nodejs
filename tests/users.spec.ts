@@ -7,6 +7,7 @@ import { Role, UserModel } from '../src/api/users/users.model'
 import jwt from 'jsonwebtoken'
 
 const URL = '/api/users'
+const HEADER_KEY_TOKEN = 'x-access-token'
 
 describe('Tester le controller /api/users', () => {
     let user
@@ -46,7 +47,7 @@ describe('Tester le controller /api/users', () => {
         const res = await request(app)
             .delete(URL + '/' + user._id)
             .set({
-                'x-access-token': token
+                [HEADER_KEY_TOKEN]: token
             })
         expect(res.status).toBe(403)
     })
@@ -103,4 +104,34 @@ describe('Tester le controller /api/users', () => {
         expect(res.status).toBe(400)
     })
     */
+
+    describe('Test /api/me', () => {
+        const URL_ME = '/api/me'
+
+        test('[GET] me', async () => {
+            const res = await request(app)
+                .get(URL_ME)
+                .set({
+                    [HEADER_KEY_TOKEN]: token
+                })
+            expect(res.status).toBe(200)
+            expect(res.body).toHaveProperty('_id')
+            expect(res.body).not.toHaveProperty('password')
+        })
+
+        test('[PUT] me', async () => {
+            const res = await request(app)
+                .put(URL_ME)
+                .set({
+                    [HEADER_KEY_TOKEN]: token
+                })
+                .send({
+                    name: 'newname'
+                })
+            expect(res.status).toBe(200)
+            expect(res.body).toHaveProperty('_id')
+            expect(res.body).not.toHaveProperty('password')
+            expect(res.body).toHaveProperty('name', 'newname')
+        })
+    })
 })

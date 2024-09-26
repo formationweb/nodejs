@@ -14,6 +14,9 @@ export async function authMiddleware(req, _, next) {
         }
         const decoded = jwt.verify(token, process.env.JWT_SECRET_TOKEN as string) as JwtDecoded
         req.user = await UserModel.findById(decoded.userId) // amélioration possible: faire un cache (avec redis par exemple)
+        if (!req.user) {
+            throw 'user not found'
+        }
         req.user.password = undefined
         next()
     }
