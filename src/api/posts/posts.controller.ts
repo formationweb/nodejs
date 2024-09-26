@@ -45,7 +45,7 @@ export async function createPost(req, res, next) {
     const post = new Post({
       title,
       content,
-      //userId: 
+      userId: '66f513a415f3bdfd1b86658b'
     });
     const postCreated = await post.save();
     res.status(201).json(postCreated);

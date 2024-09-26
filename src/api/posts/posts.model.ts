@@ -15,7 +15,7 @@ export const Post = model('Post', new Schema({
         default: Date.now
     },
     userId: {
-        type: Number,
-        
+        type: Schema.Types.ObjectId,
+        ref: 'User'
     }
 }))

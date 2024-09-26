@@ -4,6 +4,7 @@ import fs from "fs";
 import { z, ZodError } from "zod";
 import { Follow, followSchema, userSchema, User } from "./users.schema";
 import { UserModel } from "./users.model";
+import { Post } from "../posts/posts.model";
 
 const follows: Follow[] = [];
 
@@ -16,9 +17,16 @@ const follows: Follow[] = [];
 export async function getUsers(req, res, next) {
   try {
     const users = await UserModel.find({
-        name: {
-            $eq: 'ana'
-        }
+      /*$or: [
+        {
+          name: 'ana'
+        },
+        {
+          age: {
+            $gt: 18
+          }
+        },
+      ]*/
     });
     res.json(users);
   } catch (err) {
@@ -26,25 +34,35 @@ export async function getUsers(req, res, next) {
   }
 }
 
-export function getUser(req, res, next) {
-  const testValue = req.query.test;
-  console.log(testValue);
-  const id = req.params.userId;
-  res.json({
-    id, // équivalent à id: id
-    name: "ana",
-    email: "ana@gmail.com",
-  });
+export async function getUser(req, res, next) {
+  try {
+    const id = req.params.userId;
+    const user = await UserModel.findById(id)
+    if (!user) {
+      throw new NotFoundError('User')
+    }
+    res.json(user)
+  }
+  catch (err) {
+    next(err)
+  }
 }
 
-export function getUserPosts(req, res, next) {
-  const id = req.params.userId;
-  const userPosts = data.filter((post) => post.userId == id);
-  if (userPosts.length == 0) {
-    next(new NotFoundError("not user"));
-    return;
+export async function getUserPosts(req, res, next) {
+  try {
+    const id = req.params.userId;
+    const posts = await Post.find().populate({
+      path: 'userId',
+      select: 'name',
+      match: {
+        _id: id
+      }
+    })
+    res.json(posts)
   }
-  res.json(userPosts);
+  catch (err) {
+      next(err)
+  }
 }
 
 export async function createUser(req, res, next) {

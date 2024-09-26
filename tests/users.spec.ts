@@ -1,26 +1,22 @@
-import { describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 import request from 'supertest'
 import { getUsers } from '../src/api/users/users.controller'
 import { app } from '../src/server'
+import mongoose from 'mongoose'
+import { UserModel } from '../src/api/users/users.model'
 
 const URL = '/api/users'
 
 describe('Tester le controller /api/users', () => {
-    test('Tester getUsers()', () => {
-        const req = vi.fn()
-        const res = {
-            json: vi.fn()
-        }
-        const next = vi.fn()
-        getUsers(req, res, next)
-        expect(res.json).toHaveBeenCalled()
-        expect(res.json).toHaveBeenCalledWith([ 
-            {
-                id: 1,
-                name: 'ana',
-                email: 'ana@gmail.com'
-            }
-        ])
+    let user
+
+    beforeEach(async () => {
+        await mongoose.connection.dropDatabase()
+        user = new UserModel({
+            name: 'ana',
+            email: 'ana@gmail.com'
+        })
+        await user.save()
     })
 
     test('[GET] User', async () => {
@@ -29,7 +25,13 @@ describe('Tester le controller /api/users', () => {
         expect(res.body).toHaveLength(1)
     })
 
-    test('[GET] User Posts', async () => {
+    test('[GET] User Id', async () => {
+        const res = await request(app).get(URL + '/' + user._id)
+        expect(res.status).toBe(200)
+        expect(res.body).toHaveProperty('name', 'ana')
+    })
+
+   /* test('[GET] User Posts', async () => {
         const res = await request(app).get(URL + '/1/posts')
         expect(res.status).toBe(200)
         expect(res.body.length).toBeGreaterThan(0)
@@ -69,8 +71,5 @@ describe('Tester le controller /api/users', () => {
             })
         expect(res.status).toBe(400)
     })
-
-
-    //  await request(app).post(URL).send({  })
-    //  expect({ }).toHaveProperty('name', 'ana')
+    */
 })

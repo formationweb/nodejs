@@ -26,5 +26,6 @@ export const UserModel = model('User', new Schema({
         type: String,
         enum: ['admin', 'member'],
         default: 'member'
-    }
+    },
+    age: Number
 }))
