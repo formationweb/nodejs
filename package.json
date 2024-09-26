@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "tsx --watch --env-file=.env src/index.ts",
     "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "build": "tsc",
+    "start": "node dist/src/index.js"
   },
   "keywords": [],
   "author": "",
