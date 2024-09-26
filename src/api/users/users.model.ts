@@ -1,7 +1,13 @@
 import { model, Schema } from "mongoose";
 import isEmail from 'validator/lib/isEmail';
+import bcrypt from 'bcrypt'
+import { User } from "./users.schema";
 
-export const UserModel = model('User', new Schema({
+export interface IUser extends User {
+    role: 'admin' | 'member'
+}
+
+const userSchema =  new Schema({
     name: {
         type: String,
         required: true
@@ -18,6 +24,11 @@ export const UserModel = model('User', new Schema({
             message: 'Email incorrect'
         }
     },
+    password: {
+        type: String,
+        required: true,
+        minlength: 8
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -28,4 +39,10 @@ export const UserModel = model('User', new Schema({
         default: 'member'
     },
     age: Number
-}))
+})
+
+userSchema.pre('save', async function() {
+    this.password = await bcrypt.hash(this.password, 10)
+})
+
+export const UserModel = model('User', userSchema)

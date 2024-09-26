@@ -1,10 +1,14 @@
+import { ForbiddenError } from './../../errors/forbidden';
 import { BadRequestError } from "./../../errors/bad-request";
 import { NotFoundError } from "./../../errors/not-found";
 import fs from "fs";
 import { z, ZodError } from "zod";
 import { Follow, followSchema, userSchema, User } from "./users.schema";
-import { UserModel } from "./users.model";
+import { IUser, UserModel } from "./users.model";
 import { Post } from "../posts/posts.model";
+import { NotAuthorizedError } from "../../errors/not-authorized";
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 const follows: Follow[] = [];
 
@@ -69,12 +73,14 @@ export async function createUser(req, res, next) {
  try {
     const { success, error, data } = userSchema.safeParse(req.body);
     if (success) {
-      const { name, email } = data;
+      const { name, email, password } = data;
       const user = new UserModel({
         name,
         email,
+        password
       });
       const userCreated = await user.save();
+      userCreated.password = undefined as any
       res.status(201).json(userCreated);
     } else {
       throw new BadRequestError()
@@ -88,13 +94,14 @@ export async function createUser(req, res, next) {
 export async function updateUser(req, res, next) {
   try {
     const id = req.params.userId;
-    const { name, email } = req.body;
+    const { name, email, password } = req.body;
     // const user = await UserModel.findById(id)
     const user = await UserModel.findByIdAndUpdate(
       id,
       {
         name,
         email,
+        password
       },
       {
         new: true,
@@ -145,4 +152,33 @@ export function followUser(req, res, next) {
     }
     next(err);
   }
+}
+
+export async function login(req, res ,next) {
+   try {
+    const loginSchema = z.object({
+      email: z.string(),
+      password: z.string()
+     }).strict()
+     loginSchema.parse(req.body)
+     const { email, password } = req.body
+     const user =  await UserModel.findOne({ email })
+     if (!user) {
+      throw new NotAuthorizedError()
+     }
+     const bool = await bcrypt.compare(password, user.password)
+     if (!bool) {
+      throw new NotAuthorizedError()
+     }
+     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_TOKEN as string, {
+      expiresIn: '3d'
+     })
+     res.json({
+      token,
+      userId: user._id
+     })
+   }
+   catch (err) {
+    next(err)
+   }
 }
