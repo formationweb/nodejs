@@ -41,7 +41,7 @@ export async function getUsers(req, res, next) {
 export async function getUser(req, res, next) {
   try {
     const id = req.params.userId;
-    const user = await UserModel.findById(id)
+    const user = await UserModel.findById(id, '-password')
     if (!user) {
       throw new NotFoundError('User')
     }

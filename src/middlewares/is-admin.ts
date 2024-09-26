@@ -1,4 +1,4 @@
-import { IUser } from "../api/users/users.model";
+import { IUser, Role } from "../api/users/users.model";
 import { ForbiddenError } from "../errors/forbidden";
 
 export async function isAdminMiddleware(req, _, next) {
@@ -8,7 +8,7 @@ export async function isAdminMiddleware(req, _, next) {
     }
     try {
         const user = req.user as IUser
-        if (user.role != 'admin') {
+        if (user.role != Role.Admin) {
             throw new ForbiddenError()
         }
         next()

@@ -3,20 +3,25 @@ import request from 'supertest'
 import { getUsers } from '../src/api/users/users.controller'
 import { app } from '../src/server'
 import mongoose from 'mongoose'
-import { UserModel } from '../src/api/users/users.model'
+import { Role, UserModel } from '../src/api/users/users.model'
+import jwt from 'jsonwebtoken'
 
 const URL = '/api/users'
 
 describe('Tester le controller /api/users', () => {
     let user
+    let token
 
     beforeEach(async () => {
         await mongoose.connection.dropDatabase()
         user = new UserModel({
             name: 'ana',
-            email: 'ana@gmail.com'
+            email: 'ana@gmail.com',
+            password: 'azertyui'
         })
-        await user.save()
+        const userSaved = await user.save()
+        process.env.JWT_SECRET_TOKEN = 'test'
+        token = jwt.sign({ userId: userSaved._id }, process.env.JWT_SECRET_TOKEN)
     })
 
     test('[GET] User', async () => {
@@ -29,6 +34,32 @@ describe('Tester le controller /api/users', () => {
         const res = await request(app).get(URL + '/' + user._id)
         expect(res.status).toBe(200)
         expect(res.body).toHaveProperty('name', 'ana')
+        expect(res.body.password).not.toBeDefined() // .toBeUndefined()
+    })
+
+    test('[Delete] User with not auth', async () => {
+        const res = await request(app).delete(URL + '/' + user._id)
+        expect(res.status).toBe(401)
+    })
+
+    test('[Delete] User but not admin', async () => {
+        const res = await request(app)
+            .delete(URL + '/' + user._id)
+            .set({
+                'x-access-token': token
+            })
+        expect(res.status).toBe(403)
+    })
+
+    test('[Delete] User, ok', async () => {
+        user.role = Role.Admin
+        await user.save()
+        const res = await request(app)
+            .delete(URL + '/' + user._id)
+            .set({
+                'x-access-token': token
+            })
+        expect(res.status).toBe(204)
     })
 
    /* test('[GET] User Posts', async () => {

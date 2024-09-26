@@ -3,8 +3,13 @@ import isEmail from 'validator/lib/isEmail';
 import bcrypt from 'bcrypt'
 import { User } from "./users.schema";
 
+export enum Role {
+    Admin = 'admin',
+    Member = 'member'
+}
+
 export interface IUser extends User {
-    role: 'admin' | 'member'
+    role: Role
 }
 
 const userSchema =  new Schema({
