@@ -4,15 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "serve static",
+    "dev": "node --watch main.js"
   },
   "author": "",
   "license": "ISC",
   "type": "module",
+  "devDependencies": {
+    "serve": "^14.2.4",
+    "typescript": "^5.7.2"
+  },
   "dependencies": {
     "is-odd": "^3.0.1"
-  },
-  "devDependencies": {
-    "typescript": "^5.7.2"
   }
 }
