@@ -15,6 +15,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "is-odd": "^3.0.1"
+    "is-odd": "^3.0.1",
+    "markdown-it": "^14.1.0"
   }
 }
