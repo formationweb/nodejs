@@ -43,4 +43,15 @@ describe('Tester l\'api /api/users', () => {
             })
         expect(res.status).toBe(400)
     })
+
+    test('[GET] Users Posts', async () => {
+        const res = await request(app).get(URL + '/1/posts')
+        expect(res.status).toBe(200)
+        expect(res.body.length).toBeGreaterThan(0)
+    })
+
+    test('[GET] Users Posts not found', async () => {
+        const res = await request(app).get(URL + '/1000/posts')
+        expect(res.status).toBe(404)
+    })
 })
