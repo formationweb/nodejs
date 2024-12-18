@@ -6,6 +6,8 @@ import { ErrorWithStatus } from './errors/errors.interface'
 
 export const app = express()
 
+app.use(express.json())
+
 app.use('/api/users', usersRouter)
 app.use('/api/posts', postsRouter)
 

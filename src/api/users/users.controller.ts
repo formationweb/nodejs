@@ -1,5 +1,7 @@
 import fs from 'fs'
 import { NotFoundError } from '../../errors/not-found'
+import { userSchemaDto } from './users.schema'
+import { BadRequestError } from '../../errors/bad-request'
 
 const dataUsers = JSON.parse(fs.readFileSync('src/data/users.json', 'utf-8'))
 const dataPosts = JSON.parse(fs.readFileSync('src/data/posts.json', 'utf-8'))
@@ -11,7 +13,7 @@ export function getUsers(req, res) {
 }
 
 export function getUser(req, res, next) {
-    const id = req.params.id
+    const id = req.params.userId
     const userFound = dataUsers.find(user => user.id == id)
     if (userFound) {
         res.json(userFound)
@@ -20,12 +22,30 @@ export function getUser(req, res, next) {
     next(new NotFoundError('User'))
 }
 
-export function createUser(req, res) {
-    console.log('Création')
-    res.json({
-        id: 1,
-        name: 'ana'
-    })
+export function createUser(req, res, next) {
+    // const { success, data, error } = userSchema.safeParse(req.body)
+    // if (success) {
+    //     res.json({
+    //         id: 1,
+    //         name: data.name,
+    //         email: data.email
+    //     })
+    //     return
+    // }
+    // console.log(error.errors)
+    // next(new BadRequestError())
+    try {
+        const data = userSchemaDto.parse(req.body)
+        res.status(201).json({
+            id: 1,
+            name: data.name,
+            email: data.email
+        })
+    }
+    catch (err: any) {
+        console.log(err.errors)
+        next(new BadRequestError())
+    }
 }
 
 export function getUserPosts(req, res, next) {
@@ -36,4 +56,14 @@ export function getUserPosts(req, res, next) {
         return
     }
     res.json(userPosts)
+}
+
+export function updateUser(req, res, next) {
+    const id = req.params.userId
+    res.json({ name: 'test '})
+}
+
+export function deleteUser(req, res, next) {
+    const id = req.params.userId
+    res.status(204).send()
 }
