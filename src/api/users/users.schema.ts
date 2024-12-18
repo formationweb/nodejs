@@ -5,4 +5,10 @@ export const userSchemaDto = z.object({
     email: z.string().email()
 })
 
+export const followSchema = z.object({
+    followerId: z.number().int().positive(),
+    followeeId: z.number().int().positive()
+})
+
 export type User = z.infer<typeof userSchemaDto>
+export type Follow = z.infer<typeof followSchema>

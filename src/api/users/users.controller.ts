@@ -1,10 +1,13 @@
 import fs from 'fs'
 import { NotFoundError } from '../../errors/not-found'
-import { userSchemaDto } from './users.schema'
+import { followSchema, userSchemaDto } from './users.schema'
 import { BadRequestError } from '../../errors/bad-request'
+import { ZodError } from 'zod'
 
 const dataUsers = JSON.parse(fs.readFileSync('src/data/users.json', 'utf-8'))
 const dataPosts = JSON.parse(fs.readFileSync('src/data/posts.json', 'utf-8'))
+
+const follows = [];
 
 export function getUsers(req, res) {
     const sortBy = req.query.sort
@@ -66,4 +69,18 @@ export function updateUser(req, res, next) {
 export function deleteUser(req, res, next) {
     const id = req.params.userId
     res.status(204).send()
+}
+
+export function followUser(req, res, next) {
+    try {
+        const followData = followSchema.parse(req.body)
+        res.status(204).send()
+    }
+    catch (err) {
+        if (err instanceof ZodError) {
+            next(new BadRequestError(err.message))
+            return
+        }
+        next(err)
+    }
 }

@@ -1,11 +1,38 @@
-1. Tests pour "/api/posts":
-  * Test de Récupération de Tous les Messages: Vérifiez que la requête GET sur /api/posts retourne tous les messages.
-  * Test de Recherche par Titre: Testez la fonctionnalité de recherche sur /api/posts?search=mot-clé. Assurez-vous que les posts contenant le mot-clé dans le titre sont retournés.
-  * 
-2. Tests pour "/api/posts/:postId":
-  * Test de Récupération d'un Message Spécifique: Créez un test pour s'assurer que la requête GET avec un postId valide retourne le post correspondant.
-  * Test de Gestion des Erreurs: Testez la réponse de l'API lorsque le postId n'existe pas, s'attendant à une erreur 404.
-* 
-1. Tests pour "/api/users/:userId/posts":
-  * Test de Récupération des Messages d'un Utilisateur: Vérifiez que la requête GET retourne correctement les messages d'un utilisateur spécifié par userId.
-  * Test de Gestion des Utilisateurs Inexistants: Assurez-vous que l'API retourne une erreur 404 lorsque l’userId ne correspond à aucun utilisateur.
+Ajouter une fonctionnalité de suivi d'utilisateurs à l'API
+
+Objectif
+
+Créer un point de terminaison qui permet à un utilisateur de suivre un autre utilisateur. Utilisez Zod pour valider les entrées afin d'assurer la sécurité des données.
+
+1. Créer le schéma de validation pour le suivi (followSchema)
+
+Définissez un schéma followSchema avec Zod pour valider les données de suivi. Les données de suivi doivent inclure :
+
+followerId : ID de l'utilisateur qui suit (doit être un entier positif).
+
+> z.number().int().positive()
+
+followeeId : ID de l'utilisateur suivi (doit être un entier positif).
+
+2. Créer le point de terminaison pour suivre un utilisateur
+
+Implémentez un point de terminaison POST `/follow` qui permet à un utilisateur de suivre un autre utilisateur
+
+Puisqu’on nous n’avons pas de base de données, avoir juste un 
+
+const follows = [];
+
+en haut du fichier
+
+* Validez les données de la requête avec followSchema.
+* Vérifiez que les IDs des utilisateurs existent avant d'ajouter un suivi.
+* En cas de succès, renvoyez les données de suivi avec un statut HTTP 204.
+* En cas d'erreur de validation ou si les utilisateurs n'existent pas, renvoyez un message d'erreur approprié avec un statut HTTP 400 ou 404.
+
+3.  Tester /follow avec Vitest
+
+Créez des tests unitaires pour le point de terminaison POST /follow en utilisant Vitest. Assurez-vous de tester les cas suivants :
+
+* Suivi réussi d'un utilisateur.
+* Erreur de validation lorsque les données sont incorrectes.
+* Erreur lorsque l'utilisateur qui suit ou l'utilisateur suivi n'existe pas.
