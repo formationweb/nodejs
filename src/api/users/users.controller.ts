@@ -7,7 +7,7 @@ import { ZodError } from 'zod'
 const dataUsers = JSON.parse(fs.readFileSync('src/data/users.json', 'utf-8'))
 const dataPosts = JSON.parse(fs.readFileSync('src/data/posts.json', 'utf-8'))
 
-const follows = [];
+const follows: any[] = [];
 
 export function getUsers(req, res) {
     const sortBy = req.query.sort
@@ -74,6 +74,17 @@ export function deleteUser(req, res, next) {
 export function followUser(req, res, next) {
     try {
         const followData = followSchema.parse(req.body)
+        const { followerId, followeeId } = followData
+
+        if (!dataUsers.find(user => user.id == followerId)) {
+                throw new NotFoundError('User Id')
+        }
+        if (!dataUsers.find(user => user.id == followeeId)) {
+            throw new NotFoundError('User Id')
+        }
+
+        follows.push(followData)
+
         res.status(204).send()
     }
     catch (err) {
