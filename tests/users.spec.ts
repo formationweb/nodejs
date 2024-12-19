@@ -54,4 +54,31 @@ describe('Tester l\'api /api/users', () => {
         const res = await request(app).get(URL + '/1000/posts')
         expect(res.status).toBe(404)
     })
+
+    test('[GET] Follow User', async () => {
+        const res = await request(app).post(URL + '/follow')
+            .send({
+                followerId: 1,
+                followeeId: 2
+            })
+        expect(res.status).toBe(204)
+    })
+
+    test('[GET] Follow User with fake data', async () => {
+        const res = await request(app).post(URL + '/follow')
+            .send({
+                followerId: 'fake',
+                followeeId: 2
+            })
+        expect(res.status).toBe(400)
+    })
+
+    test('[GET] Follow User not found', async () => {
+        const res = await request(app).post(URL + '/follow')
+            .send({
+                followerId: 100000,
+                followeeId: 2
+            })
+        expect(res.status).toBe(404)
+    })
 })

@@ -16,6 +16,7 @@ app.use((req, res, next) => {
 })
 
 app.use((err: ErrorWithStatus, req: Request, res: Response, next: NextFunction) => {
+    console.log(err)
     res.status(err.status || 500).json({
         message: err.message,
         stack: err.stack // only dev
