@@ -1,11 +1,10 @@
-import fs from 'fs'
 import { NotFoundError } from '../../errors/not-found'
 import { followSchema, userSchemaDto } from './users.schema'
 import { BadRequestError } from '../../errors/bad-request'
 import { ZodError } from 'zod'
 import { User } from './users.model'
-
-const dataPosts = JSON.parse(fs.readFileSync('src/data/posts.json', 'utf-8'))
+import { Post } from '../posts/posts.model'
+import { db } from '../../db'
 
 const follows: any[] = [];
 
@@ -43,14 +42,26 @@ export async function createUser(req, res, next) {
     }
 }
 
-export function getUserPosts(req, res, next) {
-    const id = req.params.userId
-    const userPosts = dataPosts.filter(post => post.userId == id)
-    if (userPosts.length == 0) {
-        next(new NotFoundError('Not User'))
-        return
+export async function getUserPosts(req, res, next) {
+    try {
+        const id = req.params.userId
+        const user = await User.findByPk(id, {
+            include: [
+                {
+                    model: Post,
+                    as: 'articles'
+                    
+                }
+            ]
+        })
+        if (!user) {
+            throw new NotFoundError('Not User')
+        }
+        res.json(user)
     }
-    res.json(userPosts)
+    catch (err) {
+        next(err)
+    }
 }
 
 export async function updateUser(req, res, next) {
@@ -75,19 +86,34 @@ export async function updateUser(req, res, next) {
 }
 
 export async function deleteUser(req, res, next) {
+    const t = await db.transaction()
     try {
         const id = req.params.userId
+
         const rowsDeleted = await User.destroy({
             where: {
                 id
-            }
+            },
+            transaction: t
         })
+
         if (!rowsDeleted) {
             throw new NotFoundError('Not User')
         }
+
+        await Post.destroy({
+            where: {
+                userId: id
+            },
+            transaction: t
+        })
+
+        await t.commit()
+        
         res.status(204).send()
     }
     catch (err) {
+        await t.rollback()
         next(err)
     }
 }
