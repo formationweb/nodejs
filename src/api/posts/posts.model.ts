@@ -1,13 +1,16 @@
-export class Post {
-    title: string = ''
-    body: string = ''
-    id: number = 0
-    userId: number = 0
+import { DataTypes } from "sequelize";
+import { db } from "../../db";
 
-    constructor(obj) {
-        this.title = obj.title
-        this.body = obj.body
-        this.id = obj.id
-        this.userId = obj.id
+export const Post = db.define('Post', {
+    title: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    content: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    userId: {
+        type: DataTypes.INTEGER
     }
-}
+})
