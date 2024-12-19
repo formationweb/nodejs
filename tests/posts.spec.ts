@@ -1,8 +1,10 @@
 import request from 'supertest'
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { app } from "../src/server";
 
 const URL = '/api/posts'
+
+vi.mock('sequelize')
 
 describe('Tester /api/posts', () => {
     test('[GET] Posts', async () => {
