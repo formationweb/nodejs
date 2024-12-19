@@ -3,6 +3,9 @@ import usersRouter from './api/users/users.router'
 import postsRouter from './api/posts/posts.router'
 import { NotFoundError } from './errors/not-found'
 import { ErrorWithStatus } from './errors/errors.interface'
+import { db } from './db'
+
+await db.sync()
 
 export const app = express()
 

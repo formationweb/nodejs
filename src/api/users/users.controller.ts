@@ -3,47 +3,39 @@ import { NotFoundError } from '../../errors/not-found'
 import { followSchema, userSchemaDto } from './users.schema'
 import { BadRequestError } from '../../errors/bad-request'
 import { ZodError } from 'zod'
+import { User } from './users.model'
 
-const dataUsers = JSON.parse(fs.readFileSync('src/data/users.json', 'utf-8'))
 const dataPosts = JSON.parse(fs.readFileSync('src/data/posts.json', 'utf-8'))
 
 const follows: any[] = [];
 
-export function getUsers(req, res) {
-    const sortBy = req.query.sort
-    console.log(sortBy)
-    res.json(dataUsers)
+export async function getUsers(req, res) {
+    const users = await User.findAll()
+    res.json(users)
 }
 
-export function getUser(req, res, next) {
-    const id = req.params.userId
-    const userFound = dataUsers.find(user => user.id == id)
-    if (userFound) {
-        res.json(userFound)
-        return
+export async function getUser(req, res, next) {
+    try {
+        const id = req.params.userId
+        const user = await User.findByPk(id)
+        if (!user) {
+            throw new NotFoundError('User')
+        }
+        res.json(user)
     }
-    next(new NotFoundError('User'))
+    catch(err) {
+        next(err)
+    }
 }
 
-export function createUser(req, res, next) {
-    // const { success, data, error } = userSchema.safeParse(req.body)
-    // if (success) {
-    //     res.json({
-    //         id: 1,
-    //         name: data.name,
-    //         email: data.email
-    //     })
-    //     return
-    // }
-    // console.log(error.errors)
-    // next(new BadRequestError())
+export async function createUser(req, res, next) {
     try {
         const data = userSchemaDto.parse(req.body)
-        res.status(201).json({
-            id: 1,
+        const userCreated = await User.create({
             name: data.name,
             email: data.email
         })
+        res.status(201).json(userCreated)
     }
     catch (err: any) {
         console.log(err.errors)
@@ -61,14 +53,43 @@ export function getUserPosts(req, res, next) {
     res.json(userPosts)
 }
 
-export function updateUser(req, res, next) {
-    const id = req.params.userId
-    res.json({ name: 'test '})
+export async function updateUser(req, res, next) {
+   try {
+        const id = req.params.userId
+        const data = userSchemaDto.parse(req.body)
+        const [userId] = await User.update(data, {
+            where: {
+                id
+            }
+        })
+        if (!userId) {
+            throw new NotFoundError('Not User')
+        }
+        res.json(
+            await User.findByPk(userId)
+        )
+   }
+   catch (err) {
+    next(err)
+   }
 }
 
-export function deleteUser(req, res, next) {
-    const id = req.params.userId
-    res.status(204).send()
+export async function deleteUser(req, res, next) {
+    try {
+        const id = req.params.userId
+        const rowsDeleted = await User.destroy({
+            where: {
+                id
+            }
+        })
+        if (!rowsDeleted) {
+            throw new NotFoundError('Not User')
+        }
+        res.status(204).send()
+    }
+    catch (err) {
+        next(err)
+    }
 }
 
 export function followUser(req, res, next) {
@@ -77,7 +98,7 @@ export function followUser(req, res, next) {
         const { followerId, followeeId } = followData
 
         if (!dataUsers.find(user => user.id == followerId)) {
-                throw new NotFoundError('User Id')
+            throw new NotFoundError('User Id')
         }
         if (!dataUsers.find(user => user.id == followeeId)) {
             throw new NotFoundError('User Id')
