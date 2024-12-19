@@ -1,13 +1,21 @@
-export class Post {
-    title: string = ''
-    body: string = ''
-    id: number = 0
-    userId: number = 0
+import { model, Schema } from "mongoose";
 
-    constructor(obj) {
-        this.title = obj.title
-        this.body = obj.body
-        this.id = obj.id
-        this.userId = obj.id
-    }
-}
+const postSchema = new Schema({
+    title: {
+        type: String,
+        required: true,
+        maxlength: 200
+    },
+    content: {
+        type: String,
+        required: true,
+        maxlength: 2000
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    userId: String
+})
+
+export const Post = model('Post', postSchema)

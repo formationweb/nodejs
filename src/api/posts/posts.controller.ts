@@ -1,32 +1,50 @@
-import fs from 'fs'
 import { NotFoundError } from '../../errors/not-found'
 import { BadRequestError } from '../../errors/bad-request'
 import { Post } from './posts.model'
 
-const data = JSON.parse(fs.readFileSync('src/data/posts.json', 'utf-8'))
-    .map(
-        post => new Post(post)
-    )
-
-export function getPosts(req, res, next) {
-    const search = req.query.search
-    if (search) {
-        const posts = data.filter((post: Post) => post.title.includes(search))
+export async function getPosts(req, res, next) {
+    try {
+        const search = req.query.search
+        const options = search ? {
+            title: {
+                $text: new RegExp(search, 'i')
+            }
+        } : {}
+        const posts = await Post.find(options)
         res.json(posts)
-        return
     }
-    res.json(data)
+    catch (err) {
+        next(err)
+    }
 }
 
-export function getPost(req, res, next) {
-    const id = +req.params.postId
-    if (id > 0) {
-        const post = data.find(post => post.id == id)
+export async function getPost(req, res, next) {
+    try {
+        const id = req.params.postId
+        const post = await Post.findById(id)
         if (!post) {
-            next(new NotFoundError('Posts'))
-            return   
+            throw new NotFoundError('Posts')
         }
         res.json(post)
     }
-    next(new BadRequestError())
+    catch (err) {
+        next(err)
+    }
+}
+
+export async function createPost(req, res, next) {
+    try {
+        const { title, content } = req.body
+        const post = new Post({
+            title,
+            content,
+            userId: ''
+        })
+        res.status(201).json(
+            await post.save()
+        )
+    }
+    catch (err) {
+        next(err)
+    }
 }
