@@ -3,47 +3,46 @@ import { NotFoundError } from '../../errors/not-found'
 import { followSchema, userSchemaDto } from './users.schema'
 import { BadRequestError } from '../../errors/bad-request'
 import { ZodError } from 'zod'
+import { User } from './users.model'
 
 const dataUsers = JSON.parse(fs.readFileSync('src/data/users.json', 'utf-8'))
 const dataPosts = JSON.parse(fs.readFileSync('src/data/posts.json', 'utf-8'))
 
 const follows: any[] = [];
 
-export function getUsers(req, res) {
-    const sortBy = req.query.sort
-    console.log(sortBy)
-    res.json(dataUsers)
-}
-
-export function getUser(req, res, next) {
-    const id = req.params.userId
-    const userFound = dataUsers.find(user => user.id == id)
-    if (userFound) {
-        res.json(userFound)
-        return
+export async function getUsers(req, res, next) {
+    try {
+        const users = await User.find()
+        res.json(users)
     }
-    next(new NotFoundError('User'))
+    catch (err) {
+        next(err)
+    }
 }
 
-export function createUser(req, res, next) {
-    // const { success, data, error } = userSchema.safeParse(req.body)
-    // if (success) {
-    //     res.json({
-    //         id: 1,
-    //         name: data.name,
-    //         email: data.email
-    //     })
-    //     return
-    // }
-    // console.log(error.errors)
-    // next(new BadRequestError())
+export async function getUser(req, res, next) {
+    try {
+        const id = req.params.userId
+        const user = await User.findById(id)
+        if (!user) {
+            throw new NotFoundError('Users')
+        }
+        res.json(user)
+    }
+    catch (err) {
+        next(err)
+    }
+}
+
+export async function createUser(req, res, next) {
     try {
         const data = userSchemaDto.parse(req.body)
-        res.status(201).json({
-            id: 1,
+        const user = new User({
             name: data.name,
             email: data.email
         })
+        const userCreated = await user.save()
+        res.status(201).json(userCreated)
     }
     catch (err: any) {
         console.log(err.errors)

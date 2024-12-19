@@ -1,4 +1,5 @@
 import { app } from './server'
+import './db'
 
 const port = process.env.PORT || 3000
 
