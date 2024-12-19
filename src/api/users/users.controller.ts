@@ -36,7 +36,8 @@ export async function getUser(req, res, next) {
 
 export async function createUser(req, res, next) {
     try {
-        const data = userSchemaDto.parse(req.body)
+        //const data = userSchemaDto.parse(req.body)
+        const data = req.body
         const user = new User({
             name: data.name,
             email: data.email
@@ -45,8 +46,7 @@ export async function createUser(req, res, next) {
         res.status(201).json(userCreated)
     }
     catch (err: any) {
-        console.log(err.errors)
-        next(new BadRequestError())
+        next(new BadRequestError(err.errors))
     }
 }
 
@@ -60,14 +60,40 @@ export function getUserPosts(req, res, next) {
     res.json(userPosts)
 }
 
-export function updateUser(req, res, next) {
-    const id = req.params.userId
-    res.json({ name: 'test '})
+export async function updateUser(req, res, next) {
+    try {
+        //const data = userSchemaDto.parse(req.body)
+        const data = req.body
+        const id = req.params.userId
+        const user = await User.findByIdAndUpdate(id, {
+            name: data.name,
+            email: data.email
+        }, {
+            new: true,
+            runValidators: true
+        })
+        if (!user) {
+            throw new NotFoundError('Users')
+        }
+        res.json(user)
+    }
+    catch (err) {
+        next(err)
+    }
 }
 
-export function deleteUser(req, res, next) {
-    const id = req.params.userId
-    res.status(204).send()
+export async function deleteUser(req, res, next) {
+    try {
+        const id = req.params.userId
+        const userIsDeleted = await User.findByIdAndDelete(id)
+        if (!userIsDeleted) {
+            throw new NotFoundError('Users')
+        }
+        res.status(204).send()
+    }
+    catch (err) {
+        next(err)
+    }
 }
 
 export function followUser(req, res, next) {
