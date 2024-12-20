@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createUser, deleteUser, followUser, getUser, getUserPosts, getUsers, updateUser } from "./users.controller";
+import { createUser, deleteUser, followUser, getUser, getUserPosts, getUsers, login, updateUser } from "./users.controller";
 import { isIdNumberMiddleware } from "../../middlewares/is-number";
 
 const router = Router()
@@ -12,5 +12,6 @@ router.post('/', createUser)
 router.put('/:userId', fnMiddleware, updateUser)
 router.delete('/:userId', fnMiddleware, deleteUser)
 router.post('/follow', followUser)
+router.post('/login', login)
 
 export default router

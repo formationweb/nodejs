@@ -2,7 +2,8 @@ import { z } from 'zod'
 
 export const userSchemaDto = z.object({
     name: z.string().max(20).transform(username => username.trim().toLowerCase()),
-    email: z.string().email()
+    email: z.string().email(),
+    password: z.string()
 })
 
 export const followSchema = z.object({

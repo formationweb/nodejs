@@ -1,15 +1,18 @@
 import { NotFoundError } from '../../errors/not-found'
 import { followSchema } from './users.schema'
 import { BadRequestError } from '../../errors/bad-request'
-import { ZodError } from 'zod'
+import { ZodError, z } from 'zod'
 import { User } from './users.model'
 import { Post } from '../posts/posts.model'
+import { NotAuthorizedError } from '../../errors/not-authorized'
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 const follows: any[] = [];
 
 export async function getUsers(req, res, next) {
     try {
-        const users = await User.find()
+        const users = await User.find().select('-password')
         res.json(users)
     }
     catch (err) {
@@ -20,7 +23,7 @@ export async function getUsers(req, res, next) {
 export async function getUser(req, res, next) {
     try {
         const id = req.params.userId
-        const user = await User.findById(id)
+        const user = await User.findById(id).select('-password')
         if (!user) {
             throw new NotFoundError('Users')
         }
@@ -37,9 +40,11 @@ export async function createUser(req, res, next) {
         const data = req.body
         const user = new User({
             name: data.name,
-            email: data.email
+            email: data.email,
+            password: data.password
         })
         const userCreated = await user.save()
+        userCreated.password = undefined as any
         res.status(201).json(userCreated)
     }
     catch (err: any) {
@@ -131,6 +136,42 @@ export function followUser(req, res, next) {
             next(new BadRequestError(err.message))
             return
         }
+        next(err)
+    }
+}
+
+export async function login(req, res, next) {
+    try {
+        const loginSchema = z.object({
+            email: z.string(),
+            password: z.string()
+        }).strict()
+        const data = loginSchema.parse(req.body)
+        const { email, password } = data
+        const user = await User.findOne({ email })
+        if (!user) {
+            throw new NotAuthorizedError()
+        }
+        const isRightPassword = await bcrypt.compare(password, user.password)
+        if (!isRightPassword) {
+            throw new NotAuthorizedError() 
+        }
+        const token = jwt.sign({  userId: user._id }, process.env.JWT_SECRET_TOKEN, {
+            expiresIn: '15m'
+        })
+
+        // res.cookie('token', token, {
+        //     httpOnly: true,
+        //     secure: process.env.NODE_ENV == 'production',
+        //     maxAge: 3 * 24 * 60 * 60 * 1000
+        // })
+
+        res.json({ 
+            token,
+            userId: user._id
+        })
+    }
+    catch (err) {
         next(err)
     }
 }
