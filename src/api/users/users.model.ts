@@ -1,5 +1,4 @@
 import { model, Schema } from "mongoose";
-import isEmail from 'validator/es/lib/isEmail';
 import bcrypt from 'bcrypt'
 import { User as UserSchema } from "./users.schema";
 
@@ -24,11 +23,11 @@ const userSchema = new Schema({
         required: true,
         unique: true,
         validate: {
-            // validator: (email) => {
-            //     return email.includes('@')
-            // }
-            validator: isEmail,
-            message: 'Email is invalid'
+            validator: (email) => {
+                return email.includes('@')
+            }
+            //validator: isEmail,
+            //message: 'Email is invalid'
         }
     },
     password: {
