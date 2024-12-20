@@ -1,5 +1,4 @@
 import { NotFoundError } from '../../errors/not-found'
-import { BadRequestError } from '../../errors/bad-request'
 import { Post } from './posts.model'
 
 export async function getPosts(req, res, next) {
@@ -35,10 +34,11 @@ export async function getPost(req, res, next) {
 export async function createPost(req, res, next) {
     try {
         const { title, content } = req.body
+        const user = req.user
         const post = new Post({
             title,
             content,
-            userId: '676537b781946dfd1a2f1fa9'
+            userId: user._id
         })
         res.status(201).json(
             await post.save()

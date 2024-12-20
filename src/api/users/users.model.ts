@@ -1,6 +1,17 @@
 import { model, Schema } from "mongoose";
 import isEmail from 'validator/es/lib/isEmail';
 import bcrypt from 'bcrypt'
+import { User as UserSchema } from "./users.schema";
+
+export enum Role {
+    Admin = 'admin',
+    Member = 'member'
+}
+
+export interface IUser extends UserSchema {
+    role: Role
+    _id: string
+}
 
 const userSchema = new Schema({
     name: {

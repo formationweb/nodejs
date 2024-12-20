@@ -1,23 +1,31 @@
+import jwt  from 'jsonwebtoken';
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import request from "supertest";
 import { app } from "../src/server";
 import mongoose from "mongoose";
-import { User } from "../src/api/users/users.model";
+import { Role, User } from "../src/api/users/users.model";
 import { Post } from "../src/api/posts/posts.model";
 import { faker } from '@faker-js/faker'
 
 const URL = "/api/users";
+const HEADER_KEY_TOKEN = 'x-access-token'
 
 describe("Tester l'api /api/users", () => {
   let user;
+  let token
 
   beforeEach(async () => {
     await mongoose.connection.dropDatabase();
     user = new User({
       name: "ana",
       email: "ana@gmail.com",
+      password: 'azertyui'
     });
     await user.save();
+    process.env.JWT_SECRET_TOKEN = 'test'
+    token = jwt.sign({
+      userId: user._id
+    }, process.env.JWT_SECRET_TOKEN)
   });
 
   test("[GET] User", async () => {
@@ -36,6 +44,7 @@ describe("Tester l'api /api/users", () => {
     const res = await request(app).post(URL).send({
       name: "test",
       email: "test@aa.net",
+      password: 'azertyui'
     });
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty("_id");
@@ -50,19 +59,37 @@ describe("Tester l'api /api/users", () => {
   });
 
   test("[PUT] User", async () => {
+    user.role = Role.Admin
+    await user.save()
     const res = await request(app)
       .put(URL + "/" + user._id)
+      .set({
+        [HEADER_KEY_TOKEN]: token
+      })
       .send({
         name: "test",
         email: "test@test.net",
-      });
+      })
     expect(res.status).toBe(200);
     expect(res.body.email).toBe("test@test.net");
   });
 
   test("[DELETE] User", async () => {
-    const res = await request(app).delete(URL + "/" + user._id);
+    user.role = Role.Admin
+    await user.save()
+    const res = await request(app).delete(URL + "/" + user._id)
+      .set({
+        [HEADER_KEY_TOKEN]: token
+      })
     expect(res.status).toBe(204);
+  });
+
+  test("[DELETE] User without admin role", async () => {
+    const res = await request(app).delete(URL + "/" + user._id)
+      .set({
+        [HEADER_KEY_TOKEN]: token
+      })
+    expect(res.status).toBe(403);
   });
 
   describe('Test Users Post', () => {
