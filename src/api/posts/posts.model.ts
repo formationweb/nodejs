@@ -15,7 +15,10 @@ const postSchema = new Schema({
         type: Date,
         default: Date.now
     },
-    userId: String
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }
 })
 
 postSchema.index({

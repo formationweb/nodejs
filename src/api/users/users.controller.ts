@@ -1,12 +1,9 @@
-import fs from 'fs'
 import { NotFoundError } from '../../errors/not-found'
-import { followSchema, userSchemaDto } from './users.schema'
+import { followSchema } from './users.schema'
 import { BadRequestError } from '../../errors/bad-request'
 import { ZodError } from 'zod'
 import { User } from './users.model'
-
-const dataUsers = JSON.parse(fs.readFileSync('src/data/users.json', 'utf-8'))
-const dataPosts = JSON.parse(fs.readFileSync('src/data/posts.json', 'utf-8'))
+import { Post } from '../posts/posts.model'
 
 const follows: any[] = [];
 
@@ -50,14 +47,31 @@ export async function createUser(req, res, next) {
     }
 }
 
-export function getUserPosts(req, res, next) {
-    const id = req.params.userId
-    const userPosts = dataPosts.filter(post => post.userId == id)
-    if (userPosts.length == 0) {
-        next(new NotFoundError('Not User'))
-        return
-    }
-    res.json(userPosts)
+export async function getUserPosts(req, res, next) {
+   try {
+        const id = req.params.userId
+        const user = await User.findById(id)
+
+        if (!user) {
+            throw new NotFoundError('Users')
+        }
+
+        const userPosts = await Post
+            .find()
+            .select('-__v')
+            .limit(10)
+            .populate({
+                path: 'userId',
+                match: {
+                    _id: id
+                },
+                select: '-email -__v'
+            })
+        res.json(userPosts)
+   }
+   catch (err) {
+    next(err)
+   }
 }
 
 export async function updateUser(req, res, next) {

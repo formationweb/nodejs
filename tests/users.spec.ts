@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import request from "supertest";
-import { getUsers } from "../src/api/users/users.controller";
 import { app } from "../src/server";
 import mongoose from "mongoose";
 import { User } from "../src/api/users/users.model";
+import { Post } from "../src/api/posts/posts.model";
+import { faker } from '@faker-js/faker'
 
 const URL = "/api/users";
 
@@ -49,31 +50,47 @@ describe("Tester l'api /api/users", () => {
   });
 
   test("[PUT] User", async () => {
-    const res = await request(app).put(URL + "/" + user._id).send({
-      name: "test",
-      email: "test@test.net",
-    });
+    const res = await request(app)
+      .put(URL + "/" + user._id)
+      .send({
+        name: "test",
+        email: "test@test.net",
+      });
     expect(res.status).toBe(200);
     expect(res.body.email).toBe("test@test.net");
   });
 
   test("[DELETE] User", async () => {
-    const res = await request(app).delete(URL + "/" + user._id)
+    const res = await request(app).delete(URL + "/" + user._id);
     expect(res.status).toBe(204);
   });
 
+  describe('Test Users Post', () => {
+    let post
+    let fakeMongoId = faker.database.mongodbObjectId()
+
+    beforeEach(async () => {
+      post = new Post({
+          title: 'titre',
+          content: 'content',
+          userId: user._id
+      });
+      await post.save();
+    })
+
+    test("[GET] Users Posts", async () => {
+      const res = await request(app).get(URL + '/' + user._id + '/posts');
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBeGreaterThan(0);
+    });
+  
+    test("[GET] Users Posts not found", async () => {
+      const res = await request(app).get(URL + "/" + fakeMongoId + "/posts");
+      expect(res.status).toBe(404);
+    });
+  })
+
   /*
-
-    test('[GET] Users Posts', async () => {
-        const res = await request(app).get(URL + '/1/posts')
-        expect(res.status).toBe(200)
-        expect(res.body.length).toBeGreaterThan(0)
-    })
-
-    test('[GET] Users Posts not found', async () => {
-        const res = await request(app).get(URL + '/1000/posts')
-        expect(res.status).toBe(404)
-    })
 
     test('[GET] Follow User', async () => {
         const res = await request(app).post(URL + '/follow')
