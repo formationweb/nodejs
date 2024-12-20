@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express'
 import usersRouter from './api/users/users.router'
 import postsRouter from './api/posts/posts.router'
+import meRouter from './api/me/me.router'
 import { NotFoundError } from './errors/not-found'
 import { ErrorWithStatus } from './errors/errors.interface'
 
@@ -8,6 +9,7 @@ export const app = express()
 
 app.use(express.json())
 
+app.use('/api/me', meRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/posts', postsRouter)
 

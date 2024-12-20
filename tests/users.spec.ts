@@ -1,31 +1,34 @@
-import jwt  from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import request from "supertest";
 import { app } from "../src/server";
 import mongoose from "mongoose";
 import { Role, User } from "../src/api/users/users.model";
 import { Post } from "../src/api/posts/posts.model";
-import { faker } from '@faker-js/faker'
+import { faker } from "@faker-js/faker";
 
 const URL = "/api/users";
-const HEADER_KEY_TOKEN = 'x-access-token'
+const HEADER_KEY_TOKEN = "x-access-token";
 
 describe("Tester l'api /api/users", () => {
   let user;
-  let token
+  let token;
 
   beforeEach(async () => {
     await mongoose.connection.dropDatabase();
     user = new User({
       name: "ana",
       email: "ana@gmail.com",
-      password: 'azertyui'
+      password: "azertyui",
     });
     await user.save();
-    process.env.JWT_SECRET_TOKEN = 'test'
-    token = jwt.sign({
-      userId: user._id
-    }, process.env.JWT_SECRET_TOKEN)
+    process.env.JWT_SECRET_TOKEN = "test";
+    token = jwt.sign(
+      {
+        userId: user._id,
+      },
+      process.env.JWT_SECRET_TOKEN
+    );
   });
 
   test("[GET] User", async () => {
@@ -44,7 +47,7 @@ describe("Tester l'api /api/users", () => {
     const res = await request(app).post(URL).send({
       name: "test",
       email: "test@aa.net",
-      password: 'azertyui'
+      password: "azertyui",
     });
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty("_id");
@@ -59,63 +62,65 @@ describe("Tester l'api /api/users", () => {
   });
 
   test("[PUT] User", async () => {
-    user.role = Role.Admin
-    await user.save()
+    user.role = Role.Admin;
+    await user.save();
     const res = await request(app)
       .put(URL + "/" + user._id)
       .set({
-        [HEADER_KEY_TOKEN]: token
+        [HEADER_KEY_TOKEN]: token,
       })
       .send({
         name: "test",
         email: "test@test.net",
-      })
+      });
     expect(res.status).toBe(200);
     expect(res.body.email).toBe("test@test.net");
   });
 
   test("[DELETE] User", async () => {
-    user.role = Role.Admin
-    await user.save()
-    const res = await request(app).delete(URL + "/" + user._id)
+    user.role = Role.Admin;
+    await user.save();
+    const res = await request(app)
+      .delete(URL + "/" + user._id)
       .set({
-        [HEADER_KEY_TOKEN]: token
-      })
+        [HEADER_KEY_TOKEN]: token,
+      });
     expect(res.status).toBe(204);
   });
 
   test("[DELETE] User without admin role", async () => {
-    const res = await request(app).delete(URL + "/" + user._id)
+    const res = await request(app)
+      .delete(URL + "/" + user._id)
       .set({
-        [HEADER_KEY_TOKEN]: token
-      })
+        [HEADER_KEY_TOKEN]: token,
+      });
     expect(res.status).toBe(403);
   });
 
-  describe('Test Users Post', () => {
-    let post
-    let fakeMongoId = faker.database.mongodbObjectId()
+  describe("Test Users Post", () => {
+    let post;
+    let fakeMongoId = faker.database.mongodbObjectId();
 
     beforeEach(async () => {
       post = new Post({
-          title: 'titre',
-          content: 'content',
-          userId: user._id
+        title: "titre",
+        content: "content",
+        userId: user._id,
       });
       await post.save();
-    })
+    });
 
     test("[GET] Users Posts", async () => {
-      const res = await request(app).get(URL + '/' + user._id + '/posts');
+      const res = await request(app).get(URL + "/" + user._id + "/posts");
       expect(res.status).toBe(200);
       expect(res.body.length).toBeGreaterThan(0);
     });
-  
+
     test("[GET] Users Posts not found", async () => {
       const res = await request(app).get(URL + "/" + fakeMongoId + "/posts");
       expect(res.status).toBe(404);
     });
-  })
+  });
 
   /*
 
@@ -145,4 +150,34 @@ describe("Tester l'api /api/users", () => {
             })
         expect(res.status).toBe(404)
     })*/
+
+  describe("Test /api/me", () => {
+    const URL_ME = "/api/me";
+
+    test("[GET] me", async () => {
+      const res = await request(app)
+        .get(URL_ME)
+        .set({
+          [HEADER_KEY_TOKEN]: token,
+        })
+      expect(res.status).toBe(200)
+      expect(res.body).toHaveProperty('_id')
+      expect(res.body).not.toHaveProperty('password')
+    });
+
+    test("[PUT] me", async () => {
+      const res = await request(app)
+        .put(URL_ME)
+        .set({
+          [HEADER_KEY_TOKEN]: token,
+        })
+        .send({
+          name: 'newname'
+        })
+      expect(res.status).toBe(200)
+      expect(res.body).toHaveProperty('_id')
+      expect(res.body).toHaveProperty('name', 'newname')
+      expect(res.body).not.toHaveProperty('password')
+    });
+  });
 });
