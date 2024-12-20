@@ -1,6 +1,7 @@
 import { model, Schema } from "mongoose";
 import bcrypt from 'bcrypt'
 import { User as UserSchema } from "./users.schema";
+import isEmail from 'validator/lib/isEmail';
 
 export enum Role {
     Admin = 'admin',
@@ -24,10 +25,9 @@ const userSchema = new Schema({
         unique: true,
         validate: {
             validator: (email) => {
-                return email.includes('@')
-            }
-            //validator: isEmail,
-            //message: 'Email is invalid'
+                return isEmail(email)
+            },
+            message: 'Email is invalid'
         }
     },
     password: {
