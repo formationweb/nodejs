@@ -6,8 +6,8 @@ export async function getPosts(req, res, next) {
     try {
         const search = req.query.search
         const options = search ? {
-            title: {
-                $text: new RegExp(search, 'i')
+            $text: {
+                $search: search
             }
         } : {}
         const posts = await Post.find(options)

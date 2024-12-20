@@ -18,4 +18,8 @@ const postSchema = new Schema({
     userId: String
 })
 
+postSchema.index({
+    title: 'text'
+})
+
 export const Post = model('Post', postSchema)
