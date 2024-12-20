@@ -2,13 +2,11 @@ import { NotFoundError } from '../../errors/not-found'
 import { followSchema } from './users.schema'
 import { BadRequestError } from '../../errors/bad-request'
 import { ZodError, z } from 'zod'
-import { User } from './users.model'
+import { Follow, User } from './users.model'
 import { Post } from '../posts/posts.model'
 import { NotAuthorizedError } from '../../errors/not-authorized'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-
-const follows: any[] = [];
 
 export async function getUsers(req, res, next) {
     try {
@@ -115,19 +113,24 @@ export async function deleteUser(req, res, next) {
     }
 }
 
-export function followUser(req, res, next) {
+export async function followUser(req, res, next) {
     try {
         const followData = followSchema.parse(req.body)
-        const { followerId, followeeId } = followData
+        const { followeeId } = followData
+        const followerId = req.user._id
 
-        if (!dataUsers.find(user => user.id == followerId)) {
-                throw new NotFoundError('User Id')
-        }
-        if (!dataUsers.find(user => user.id == followeeId)) {
-            throw new NotFoundError('User Id')
+        const followee = await User.findById(followeeId)
+        if (!followee) {
+            throw new NotFoundError('User to follow')
         }
 
-        follows.push(followData)
+        const existingFollow = await Follow.findOne({ followerId, followeeId })
+        if (existingFollow) {
+            throw new BadRequestError('Already following')
+        }
+
+        const newFollow = new Follow({ followerId, followeeId })
+        await newFollow.save()
 
         res.status(204).send()
     }
@@ -156,7 +159,7 @@ export async function login(req, res, next) {
         if (!isRightPassword) {
             throw new NotAuthorizedError() 
         }
-        const token = jwt.sign({  userId: user._id }, process.env.JWT_SECRET_TOKEN, {
+        const token = jwt.sign({  userId: user._id }, process.env.JWT_SECRET_TOKEN as string, {
             expiresIn: '15m'
         })
 

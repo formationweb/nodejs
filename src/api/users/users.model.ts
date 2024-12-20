@@ -52,3 +52,19 @@ userSchema.pre('save', async function() {
 })
 
 export const User = model('User', userSchema)
+export const Follow= model('Follow', new Schema({
+    followerId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    followeeId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+}))

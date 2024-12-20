@@ -7,8 +7,7 @@ export const userSchemaDto = z.object({
 })
 
 export const followSchema = z.object({
-    followerId: z.number().int().positive(),
-    followeeId: z.number().int().positive()
+    followeeId: z.string()
 })
 
 export type User = z.infer<typeof userSchemaDto>

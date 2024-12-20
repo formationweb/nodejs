@@ -13,7 +13,7 @@ router.get('/:userId/posts', fnMiddleware, getUserPosts)
 router.post('/', createUser)
 router.put('/:userId', authMiddleware, isAdminMiddleware, fnMiddleware, updateUser)
 router.delete('/:userId', authMiddleware, isAdminMiddleware, fnMiddleware, deleteUser)
-router.post('/follow', followUser)
+router.post('/follow', authMiddleware, followUser)
 router.post('/login', login)
 
 export default router
